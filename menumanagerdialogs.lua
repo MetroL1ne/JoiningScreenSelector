@@ -29,7 +29,8 @@ function MenuManager:jss_on_joining_screen_confirm(id, nick, mode, text)
     local dialog_data = {    
 		title = managers.localization:text("dialog_warning_title"),
 		text = text .. " : " .. nick .. " | Player ID : " .. tostring(id),
-		id = "jss_on_joining_screen_confirm"
+		id = "jss_on_joining_screen_confirm",
+		force = true
 	}
 	
 	local yes_button = {
@@ -101,6 +102,29 @@ function MenuManager:jss_end_game_confirm(id, nick)
     managers.system_menu:show_buttons(dialog_data)
 end
 
+function MenuManager:jss_get_peer_string_skills(peer)
+	local skill_long = peer:skills()
+
+	if not skill_long then
+		return ""
+	end
+
+	local function pad(num)
+		return string.format("%02d", num)
+	end
+
+	local skillpoints = string.split(string.split(skill_long, "-")[1], "_")
+	local mas_skillpoints = "M: " .. pad(skillpoints[1]) .. " " .. pad(skillpoints[2]) .. " " .. pad(skillpoints[3])
+	local enf_skillpoints = "E: " .. pad(skillpoints[4]) .. " " .. pad(skillpoints[5]) .. " " .. pad(skillpoints[6])
+	local tec_skillpoints = "T: " .. pad(skillpoints[7]) .. " " .. pad(skillpoints[8]) .. " " .. pad(skillpoints[9])
+	local gho_skillpoints = "G: " .. pad(skillpoints[10]) .. " " .. pad(skillpoints[11]) .. " " .. pad(skillpoints[12])
+	local fug_skillpoints = "F: " .. pad(skillpoints[13]) .. " " .. pad(skillpoints[14]) .. " " .. pad(skillpoints[15])
+		
+	local skillpoint_text = mas_skillpoints .. "   " .. enf_skillpoints .. "   " .. tec_skillpoints .. "   " .. gho_skillpoints .. "   " .. fug_skillpoints
+
+	return skillpoint_text
+end
+
 Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, nick)
 	self._jss_modlist = self._jss_modlist or {}
 	managers.hud:updater_jss_peer_id(id)
@@ -121,10 +145,10 @@ Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, ni
 			USER = player_data[jss.level_and_platform] .. string.upper(nick) 
 		}),
 		
-		text = managers.localization:text("dialog_wait") .. " 0%" .. "\n ",
+		text = managers.localization:text("dialog_wait") .. " 0%" .. "\n",
 		id = "user_dropin" .. id
 	}
-	
+
 	if Network:is_server() and jss.operate_type == 1 then
 		local disconnect_peer = {
 			text = "Disconnect",
@@ -167,6 +191,11 @@ Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, ni
 	    dialog_data.no_buttons = true
 	end
 
+	if jss.show_player_skill then
+		local skillpoints = self:jss_get_peer_string_skills(peer)
+		dialog_data.text = dialog_data.text .. skillpoints
+	end
+
 	managers.system_menu:show(dialog_data)
 	
 	if jss.show_modlist then
@@ -191,40 +220,6 @@ Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, ni
 			mod_panel:set_right(self._jss_modlist[id]:w())
 		end
 	end
-	
-	if jss.show_player_skill and managers.system_menu._active_dialog then
-		local skill_long = peer:skills()
-		local skillpoints = string.split(string.split(skill_long, "-")[1], "_")
-		local mas_skillpoints = "Mas: " .. skillpoints[1] .. " " .. skillpoints[2] .. " " .. skillpoints[3]
-		local enf_skillpoints = "Enf: " .. skillpoints[4] .. " " .. skillpoints[5] .. " " .. skillpoints[6]
-		local tec_skillpoints = "Tac: " .. skillpoints[7] .. " " .. skillpoints[8] .. " " .. skillpoints[9]
-		local gho_skillpoints = "Gho: " .. skillpoints[10] .. " " .. skillpoints[11] .. " " .. skillpoints[12]
-		local fug_skillpoints = "Fug: " .. skillpoints[13] .. " " .. skillpoints[14] .. " " .. skillpoints[15]
-		
-		local skillpoint_text = mas_skillpoints .. "   " .. enf_skillpoints .. "   " .. tec_skillpoints .. "   " .. gho_skillpoints .. "   " .. fug_skillpoints
-		
-		local skill_num = 0
-		
-		for _, sk in ipairs(skillpoints) do
-			skill_num = skill_num + tonumber(sk)
-		end
-		
-		local panel = managers.system_menu._active_dialog._ws:panel():children()[1]:children()[6]:children()[3]
-		local text_panel_org = panel:children()[2]
-			
-		local skill_text_panel = panel:text({
-			vertical = "top",
-			font = tweak_data.hud_players.ammo_font,
-			text = skillpoint_text .. " Num: " .. tostring(skill_num),
-			font_size = 21,
-			x = text_panel_org:left(),
-			y = text_panel_org:center_y()
-		})
-		
-		if skill_num > 120 then
-			skill_text_panel:set_color(tweak_data.screen_colors.pro_color)
-		end
-	end
 end)
 
 Hooks:PostHook(MenuManager, "update_person_joining", "JoiningScreenSelectorUpdate", function(self, id, progress_percentage)
@@ -238,6 +233,12 @@ Hooks:PostHook(MenuManager, "update_person_joining", "JoiningScreenSelectorUpdat
 		local progress = tostring(progress_percentage)
 
 		local dlg_text = dialog_wait .. " " .. progress .. "% " .. msPing .. "ms" ..  "\n"
+
+		if jss.show_player_skill then
+			local skillpoints = self:jss_get_peer_string_skills(peer)
+			dlg_text = dlg_text .. skillpoints
+		end
+
 		dlg:set_text(dlg_text)
 	end
 end)
