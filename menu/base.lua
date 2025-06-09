@@ -5,7 +5,7 @@ JoiningScreenSelector.settings = {
 	operate_type = 1,
 	level_and_platform = 1,
 	show_modlist = false,
-	show_player_skill = true
+	show_skillpoints = true
 }
 
 function JoiningScreenSelector:Save()
