@@ -121,8 +121,17 @@ function MenuManager:jss_get_peer_string_skills(peer)
 	local fug_skillpoints = "F: " .. pad(skillpoints[13]) .. " " .. pad(skillpoints[14]) .. " " .. pad(skillpoints[15])
 		
 	local skillpoint_text = mas_skillpoints .. "   " .. enf_skillpoints .. "   " .. tec_skillpoints .. "   " .. gho_skillpoints .. "   " .. fug_skillpoints
+	
+	local skill_num = 0
+		
+	for _, sk in ipairs(skillpoints) do
+		skill_num = skill_num + tonumber(sk)
+	end
 
-	return skillpoint_text
+	local perk_id = tonumber(string.split(string.split(skill_long, "-")[2], "_")[1])
+	local perk_text = managers.localization:to_upper_text("menu_st_spec_" .. perk_id)
+
+	return skillpoint_text, skill_num, perk_text
 end
 
 Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, nick)
@@ -141,11 +150,11 @@ Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, ni
 	}
 	
 	local dialog_data = {
-		title = managers.localization:text("dialog_dropin_title", {
+		title = managers.localization:to_upper_text("dialog_dropin_title", {
 			USER = player_data[jss.level_and_platform] .. string.upper(nick) 
 		}),
 		
-		text = managers.localization:text("dialog_wait") .. " 0%" .. "\n",
+		text = managers.localization:to_upper_text("dialog_wait") .. " 0%" .. "\n",
 		id = "user_dropin" .. id
 	}
 
@@ -191,10 +200,13 @@ Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, ni
 	    dialog_data.no_buttons = true
 	end
 
-	if jss.show_player_skill then
-		local skillpoints = self:jss_get_peer_string_skills(peer)
-		dialog_data.text = dialog_data.text .. skillpoints
+	if jss.show_skillpoints then
+		local skillpoints, num, perk = self:jss_get_peer_string_skills(peer)
+		dialog_data.text = dialog_data.text .. skillpoints .. "\nNUM: " .. tostring(num)
+		dialog_data.text = dialog_data.text .. "  " .. tostring(perk)
 	end
+
+	dialog_data.text = string.upper(dialog_data.text)
 
 	managers.system_menu:show(dialog_data)
 	
@@ -234,12 +246,13 @@ Hooks:PostHook(MenuManager, "update_person_joining", "JoiningScreenSelectorUpdat
 
 		local dlg_text = dialog_wait .. " " .. progress .. "% " .. msPing .. "ms" ..  "\n"
 
-		if jss.show_player_skill then
-			local skillpoints = self:jss_get_peer_string_skills(peer)
-			dlg_text = dlg_text .. skillpoints
+		if jss.show_skillpoints then
+		local skillpoints, num, perk = self:jss_get_peer_string_skills(peer)
+		dlg_text = dlg_text .. skillpoints .. "\nNUM: " .. tostring(num)
+		dlg_text = dlg_text .. "  " .. tostring(perk)
 		end
 
-		dlg:set_text(dlg_text)
+		dlg:set_text(string.upper(dlg_text))
 	end
 end)
 
