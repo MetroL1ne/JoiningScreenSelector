@@ -38,7 +38,14 @@
 			"description" : "jss_show_modlist_desc",
 			"callback" : "JoiningScreenSelectorToggle",
 			"value" : "show_modlist"
+		},
+		{
+			"type" : "toggle",
+			"id" : "show_skillpoints",
+			"title" : "jss_show_skillpoints_title",
+			"description" : "jss_show_skillpoints_desc",
+			"callback" : "JoiningScreenSelectorToggle",
+			"value" : "show_skillpoints"
 		}
 	]
 }
-
