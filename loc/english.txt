@@ -13,5 +13,7 @@
 	"jss_platform" : "Platform",
 	"jss_lp_empty" : "Empty",
 	"jss_show_modlist_title" : "Show Modlist",
-	"jss_show_modlist_desc" : "Show Modlist in Joining Screen"
+	"jss_show_modlist_desc" : "Show Modlist in Joining Screen",
+	"jss_show_skillpoints_title" : "Skillpoints And Perk Deck",
+	"jss_show_skillpoints_desc" : "Show Skillpoints And Perk Deck"
 }
