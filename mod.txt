@@ -1,7 +1,7 @@
 {
 	"name": "Joining Screen Selector",
 	"author": "MetroLine",
-	"version": "7",
+	"version": "7.1",
 	"priority" : -100,
 	"pre_hooks" : [
 		{"hook_id" : "lib/entry", "script_path" : "menu/base.lua"}
