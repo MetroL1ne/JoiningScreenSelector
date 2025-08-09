@@ -110,6 +110,10 @@ function MenuManager:jss_get_peer_string_skills(peer)
 	end
 
 	local function pad(num)
+		if not tonumber(num) then
+			return num
+		end
+		
 		return string.format("%02d", num)
 	end
 
@@ -134,11 +138,17 @@ function MenuManager:jss_get_peer_string_skills(peer)
 	return skillpoint_text, skill_num, perk_text
 end
 
-Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, nick)
+local old_MenuManager_show_person_joining = MenuManager.show_person_joining
+Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, nick, ...)
 	self._jss_modlist = self._jss_modlist or {}
 	managers.hud:updater_jss_peer_id(id)
 	
 	local peer = managers.network:session():peer(id)
+
+	if not peer then
+		return old_MenuManager_show_person_joining(self, id, nick, ...)
+	end
+
 	local level = managers.experience:gui_string(peer:level() or "???", peer:rank() or "???") .. " "
 	local platform = "[" .. peer:account_type_str() .. "] "
 	
@@ -240,6 +250,11 @@ Hooks:PostHook(MenuManager, "update_person_joining", "JoiningScreenSelectorUpdat
 	if dlg then
 		-- managers.mission._fading_debug_output:script().log("updater_jss_peer_id : " .. tostring(id) .. " - " ..tostring(managers.system_menu._active_dialog:id()), Color.yellow)
 		local peer = managers.network:session():peer(id)
+
+		if not peer then
+			return
+		end
+
 		local msPing = math.floor(peer:qos().ping)
 		local dialog_wait = managers.localization:text("dialog_wait")
 		local progress = tostring(progress_percentage)
