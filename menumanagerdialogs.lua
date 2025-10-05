@@ -220,7 +220,7 @@ Hooks:OverrideFunction(MenuManager, "show_person_joining", function(self, id, ni
 
 	managers.system_menu:show(dialog_data)
 	
-	if jss.show_modlist then
+	if jss.show_modlist and not self._jss_modlist[id] then
 		local hud = managers.hud:script(PlayerBase.PLAYER_INFO_HUD_PD2)
 		self._jss_modlist[id] = hud.panel:panel({
 			name = "jss_modlist" .. tostring(id),
@@ -293,3 +293,4 @@ Hooks:PostHook(MenuManager, "close_person_joining", "JoiningScreenSelector_Close
 		end
 	end
 end)
+
